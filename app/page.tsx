@@ -1,6 +1,6 @@
 import * as React from "react"
 import { OpenInV0Button } from "@/components/open-in-v0-button"
-import VigilanceMap from "@/registry/new-york/blocks/algeria-wilaya-map/components/vigilance-map"
+import WilayaMap from "@/registry/new-york/blocks/algeria-wilaya-map/components/wilaya-map"
 // This page displays items from the custom registry.
 // You are free to implement this with your own design as needed.
 
@@ -33,7 +33,14 @@ export default function Home() {
             <OpenInV0Button name="hello-world" className="w-fit" />
           </div>
           <div className="flex items-center justify-center min-h-[400px] relative">
-            <VigilanceMap />
+            <WilayaMap
+              defaultColor="#86efac"
+              selectedColor="#15803d"
+              wilayaColors={{
+                "16": "#60a5fa",
+                "31": "#f97316",
+              }}
+            />
           </div>
         </div>
       </main>

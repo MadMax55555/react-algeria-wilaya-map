@@ -1,39 +1,40 @@
 "use client"
 
 import * as React from "react"
+
 import type { AlgeriaWilaya } from "../data/algeria-wilayas"
+
 import {
-  MIN_SCALE,
   MAX_SCALE,
-  ZOOM_STEP,
+  MIN_SCALE,
   PAN_STEP,
+  ZOOM_STEP,
   getNextSelectedWilayas,
   getSelectedWilayaObjects,
   getWilayaFillColor,
-  type WilayaStatus,
-} from "../utils/vigilance-map.utils"
+} from "../utils/wilaya-map.utils"
 
-type UseVigilanceMapParams = {
+type UseWilayaMapParams = {
   data: AlgeriaWilaya[]
-  wilayaStatuses?: Partial<Record<string, WilayaStatus>>
   wilayaColors?: Partial<Record<string, string>>
   defaultColor: string
+  selectedColor: string
   selectable: boolean
   selectedWilayas?: string[]
   onWilayaClick?: (wilaya: AlgeriaWilaya) => void
   onSelectionChange?: (selectedIds: string[]) => void
 }
 
-export function useVigilanceMap({
+export function useWilayaMap({
   data,
-  wilayaStatuses,
   wilayaColors,
   defaultColor,
+  selectedColor,
   selectable,
   selectedWilayas,
   onWilayaClick,
   onSelectionChange,
-}: UseVigilanceMapParams) {
+}: UseWilayaMapParams) {
   const [internalSelected, setInternalSelected] = React.useState<string[]>([])
   const [isPointerInside, setIsPointerInside] = React.useState(false)
   const [isGuideOpen, setIsGuideOpen] = React.useState(false)
@@ -53,6 +54,7 @@ export function useVigilanceMap({
       if (!selectedWilayas) {
         setInternalSelected(next)
       }
+
       onSelectionChange?.(next)
     },
     [selectedWilayas, onSelectionChange]
@@ -66,7 +68,7 @@ export function useVigilanceMap({
         selected,
         wilayaId: id,
         selectable,
-        multiSelect
+        multiSelect,
       })
 
       if (selectable) {
@@ -75,7 +77,7 @@ export function useVigilanceMap({
 
       onWilayaClick?.(wilaya)
     },
-    [selectable, selected, updateSelection, onWilayaClick, wilayaStatuses]
+    [selected, selectable, updateSelection, onWilayaClick]
   )
 
   const removeWilaya = React.useCallback(
@@ -85,9 +87,10 @@ export function useVigilanceMap({
     [selected, updateSelection]
   )
 
-  const selectedWilayaObjects = React.useMemo(() => {
-    return getSelectedWilayaObjects(data, selected)
-  }, [data, selected])
+  const selectedWilayaObjects = React.useMemo(
+    () => getSelectedWilayaObjects(data, selected),
+    [data, selected]
+  )
 
   const getWilayaFill = React.useCallback(
     (wilayaId: string) =>
@@ -95,10 +98,10 @@ export function useVigilanceMap({
         wilayaId,
         selected,
         wilayaColors,
-        wilayaStatuses,
         defaultColor,
+        selectedColor,
       }),
-    [selected, wilayaColors, wilayaStatuses, defaultColor]
+    [selected, wilayaColors, defaultColor, selectedColor]
   )
 
   const getSvgPoint = React.useCallback((clientX: number, clientY: number) => {
@@ -120,17 +123,23 @@ export function useVigilanceMap({
       const svgPoint = getSvgPoint(clientX, clientY)
       if (!svgPoint) return
 
-      setTransform((prev) => {
-        const clampedScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, nextScale))
-        if (clampedScale === prev.scale) return prev
+      setTransform((previous) => {
+        const scale = Math.min(
+          MAX_SCALE,
+          Math.max(MIN_SCALE, nextScale)
+        )
 
-        const worldX = (svgPoint.x - prev.x) / prev.scale
-        const worldY = (svgPoint.y - prev.y) / prev.scale
+        if (scale === previous.scale) {
+          return previous
+        }
+
+        const worldX = (svgPoint.x - previous.x) / previous.scale
+        const worldY = (svgPoint.y - previous.y) / previous.scale
 
         return {
-          scale: clampedScale,
-          x: svgPoint.x - worldX * clampedScale,
-          y: svgPoint.y - worldY * clampedScale,
+          scale,
+          x: svgPoint.x - worldX * scale,
+          y: svgPoint.y - worldY * scale,
         }
       })
     },
@@ -142,10 +151,11 @@ export function useVigilanceMap({
     if (!wrapper) return
 
     const rect = wrapper.getBoundingClientRect()
+
     zoomAtPoint(
       rect.left + rect.width / 2,
       rect.top + rect.height / 2,
-      transform.scale + 0.3
+      transform.scale + ZOOM_STEP
     )
   }, [transform.scale, zoomAtPoint])
 
@@ -154,46 +164,51 @@ export function useVigilanceMap({
     if (!wrapper) return
 
     const rect = wrapper.getBoundingClientRect()
+
     zoomAtPoint(
       rect.left + rect.width / 2,
       rect.top + rect.height / 2,
-      transform.scale - 0.3
+      transform.scale - ZOOM_STEP
     )
   }, [transform.scale, zoomAtPoint])
 
   const resetTransform = React.useCallback(() => {
-    setTransform({
-      scale: 1,
-      x: 0,
-      y: 0,
-    })
+    setTransform({ scale: 1, x: 0, y: 0 })
   }, [])
 
   React.useEffect(() => {
     const wrapper = mapContainerRef.current
     if (!wrapper) return
 
-    const handleWheel = (e: WheelEvent) => {
+    const handleWheel = (event: WheelEvent) => {
       if (!isPointerInside) return
 
-      e.preventDefault()
-      e.stopPropagation()
+      event.preventDefault()
+      event.stopPropagation()
 
-      if (e.ctrlKey) {
-        const direction = e.deltaY > 0 ? -1 : 1
-        zoomAtPoint(e.clientX, e.clientY, transform.scale + direction * ZOOM_STEP)
+      if (event.ctrlKey) {
+        const direction = event.deltaY > 0 ? -1 : 1
+
+        zoomAtPoint(
+          event.clientX,
+          event.clientY,
+          transform.scale + direction * ZOOM_STEP
+        )
+
         return
       }
 
-      setTransform((prev) => {
-        const horizontalDelta = e.shiftKey
-          ? (e.deltaY !== 0 ? e.deltaY : e.deltaX)
-          : e.deltaX
+      setTransform((previous) => {
+        const horizontalDelta = event.shiftKey
+          ? event.deltaY || event.deltaX
+          : event.deltaX
 
         return {
-          ...prev,
-          x: prev.x - horizontalDelta * PAN_STEP,
-          y: e.shiftKey ? prev.y : prev.y - e.deltaY * PAN_STEP,
+          ...previous,
+          x: previous.x - horizontalDelta * PAN_STEP,
+          y: event.shiftKey
+            ? previous.y
+            : previous.y - event.deltaY * PAN_STEP,
         }
       })
     }

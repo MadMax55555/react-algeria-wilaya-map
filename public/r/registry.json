@@ -4,9 +4,9 @@
   "homepage": "https://acme.com",
   "items": [
     {
-      "name": "vigilance-map",
+      "name": "wilaya-map",
       "type": "registry:component",
-      "title": "Algeria Wilaya Vigilance Map",
+      "title": "Algeria Wilaya Wilaya Map",
       "description": "Interactive Algeria wilaya map with selection, colors, zoom, pan, controls, and a usage guide.",
       "dependencies": [
         "lucide-react"
@@ -19,9 +19,9 @@
       ],
       "files": [
         {
-          "path": "registry/new-york/blocks/algeria-wilaya-map/components/vigilance-map.tsx",
+          "path": "registry/new-york/blocks/algeria-wilaya-map/components/wilaya-map.tsx",
           "type": "registry:component",
-          "target": "components/ui/vigilance-map.tsx"
+          "target": "components/ui/wilaya-map.tsx"
         },
         {
           "path": "registry/new-york/blocks/algeria-wilaya-map/components/map-guide-dialog.tsx",
@@ -34,14 +34,14 @@
           "target": "lib/algeria-wilayas.ts"
         },
         {
-          "path": "registry/new-york/blocks/algeria-wilaya-map/hooks/use-vigilance-map.ts",
+          "path": "registry/new-york/blocks/algeria-wilaya-map/hooks/use-wilaya-map.ts",
           "type": "registry:hook",
-          "target": "hooks/use-vigilance-map.ts"
+          "target": "hooks/use-wilaya-map.ts"
         },
         {
-          "path": "registry/new-york/blocks/algeria-wilaya-map/utils/vigilance-map.utils.ts",
+          "path": "registry/new-york/blocks/algeria-wilaya-map/utils/wilaya-map.utils.ts",
           "type": "registry:lib",
-          "target": "lib/vigilance-map.utils.ts"
+          "target": "lib/wilaya-map.utils.ts"
         }
       ]
     }

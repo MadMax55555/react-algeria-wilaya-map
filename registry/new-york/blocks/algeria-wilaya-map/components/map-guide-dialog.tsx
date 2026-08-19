@@ -22,7 +22,7 @@ function MapGuideDialog({isGuideOpen,setIsGuideOpen,}: MapGuideDialogProps) {
                 Guide de la carte
             </DialogTitle>
             <DialogDescription>
-                Comment interagir avec la carte de vigilance.
+                Comment interagir avec la carte des wilayas.
             </DialogDescription>
             </DialogHeader>
 
