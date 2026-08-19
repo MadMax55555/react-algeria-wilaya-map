@@ -23,28 +23,6 @@ export function getWilayaStatus(
   return wilayaStatuses?.[wilayaId] ?? "green"
 }
 
-export function areAllSelectedWilayasGreen(
-  selected: string[],
-  wilayaStatuses?: Partial<Record<string, WilayaStatus>>
-) {
-  return selected.every((selectedId) => {
-    return getWilayaStatus(selectedId, wilayaStatuses) === "green"
-  })
-}
-
-export function canMultiSelectWilaya(
-  wilayaId: string,
-  selected: string[],
-  multiSelect: boolean,
-  wilayaStatuses?: Partial<Record<string, WilayaStatus>>
-) {
-  return (
-    multiSelect &&
-    getWilayaStatus(wilayaId, wilayaStatuses) === "green" &&
-    areAllSelectedWilayasGreen(selected, wilayaStatuses)
-  )
-}
-
 export function getWilayaFillColor({
   wilayaId,
   selected,
@@ -79,7 +57,6 @@ export function getNextSelectedWilayas({
   wilayaId,
   selectable,
   multiSelect,
-  wilayaStatuses,
 }: {
   selected: string[]
   wilayaId: string
@@ -89,12 +66,7 @@ export function getNextSelectedWilayas({
 }) {
   if (!selectable) return selected
 
-  const canMultiSelect = canMultiSelectWilaya(
-    wilayaId,
-    selected,
-    multiSelect,
-    wilayaStatuses
-  )
+  const canMultiSelect = multiSelect
 
   if (canMultiSelect) {
     return selected.includes(wilayaId)

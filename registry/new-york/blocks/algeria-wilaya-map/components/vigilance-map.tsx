@@ -4,7 +4,6 @@ import { Info, Minus, Plus, RotateCcw, X } from "lucide-react"
 
 import { Badge } from "@/registry/new-york/ui/badge"
 import { Button } from "@/registry/new-york/ui/button"
-import { Card, CardContent } from "@/registry/new-york/ui/card"
 
 import {
   algeriaWilayas,
@@ -72,8 +71,8 @@ export function VigilanceMap({
   })
 
   return (
-    <Card className="relative h-full overflow-hidden py-1">
-      <CardContent className="relative h-full p-0">
+    <div className="relative h-full overflow-hidden py-1">
+      <div className="relative h-full p-0">
         <div
           ref={mapContainerRef}
           className="relative h-full w-full overflow-hidden bg-muted/20"
@@ -215,13 +214,13 @@ export function VigilanceMap({
             </div>
           </div>
         </div>
-      </CardContent>
+      </div>
 
       <MapGuideDialog
         isGuideOpen={isGuideOpen}
         setIsGuideOpen={setIsGuideOpen}
       />
-    </Card>
+    </div>
   )
 }
 

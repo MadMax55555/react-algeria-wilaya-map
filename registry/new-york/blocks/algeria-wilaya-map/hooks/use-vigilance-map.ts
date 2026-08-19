@@ -66,8 +66,7 @@ export function useVigilanceMap({
         selected,
         wilayaId: id,
         selectable,
-        multiSelect,
-        wilayaStatuses,
+        multiSelect
       })
 
       if (selectable) {

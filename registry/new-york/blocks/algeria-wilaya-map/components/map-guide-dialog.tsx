@@ -40,8 +40,7 @@ function MapGuideDialog({isGuideOpen,setIsGuideOpen,}: MapGuideDialogProps) {
                     <span className="mt-0.5 rounded-md bg-blue-100 px-2 py-0.5 text-[11px] font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-300">
                     Alt + Click
                     </span>
-                    <span> Sélectionner plusieurs wilayas uniquement pour une création groupée, si elles
-                  n’ont pas encore de vigilance.</span>
+                    <span> Sélectionner plusieurs wilayas.</span>
                 </li>
 
                 <li className="flex items-start gap-3">
