@@ -2,8 +2,8 @@
 
 import { Info, Minus, Plus, RotateCcw, X } from "lucide-react"
 
-import { Badge } from "@/registry/new-york/ui/badge"
-import { Button } from "@/registry/new-york/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 
 import {
   algeriaWilayas,

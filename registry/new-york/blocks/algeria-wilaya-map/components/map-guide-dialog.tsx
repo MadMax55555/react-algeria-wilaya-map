@@ -5,7 +5,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/registry/new-york/ui/dialog"
+} from "@/components/ui/dialog"
 
 type MapGuideDialogProps = {
   isGuideOpen: boolean

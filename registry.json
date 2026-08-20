@@ -8,6 +8,7 @@
       "type": "registry:component",
       "title": "Algeria Wilaya Wilaya Map",
       "description": "Interactive Algeria wilaya map with selection, colors, zoom, pan, controls, and a usage guide.",
+      "author": "Saadi Bella (https://github.com/MadMax55555)",
       "dependencies": [
         "lucide-react"
       ],
