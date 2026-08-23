@@ -23,7 +23,10 @@ type WilayaMapProps = {
   strokeColor?: string
   height?: number
   selectable?: boolean
+
   selectedWilayas?: string[]
+  setSelectedWilayas?: React.Dispatch<React.SetStateAction<string[]>>
+
   onWilayaClick?: (wilaya: AlgeriaWilaya) => void
   onSelectionChange?: (selectedIds: string[]) => void
 }
@@ -37,6 +40,7 @@ export function WilayaMap({
   height = 560,
   selectable = true,
   selectedWilayas,
+  setSelectedWilayas,
   onWilayaClick,
   onSelectionChange,
 }: WilayaMapProps) {
@@ -62,6 +66,7 @@ export function WilayaMap({
     selectedColor,
     selectable,
     selectedWilayas,
+    setSelectedWilayas,
     onWilayaClick,
     onSelectionChange,
   })

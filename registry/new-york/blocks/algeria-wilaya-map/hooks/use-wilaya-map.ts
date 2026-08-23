@@ -20,7 +20,10 @@ type UseWilayaMapParams = {
   defaultColor: string
   selectedColor: string
   selectable: boolean
+
   selectedWilayas?: string[]
+  setSelectedWilayas?: React.Dispatch<React.SetStateAction<string[]>>
+
   onWilayaClick?: (wilaya: AlgeriaWilaya) => void
   onSelectionChange?: (selectedIds: string[]) => void
 }
@@ -32,6 +35,7 @@ export function useWilayaMap({
   selectedColor,
   selectable,
   selectedWilayas,
+  setSelectedWilayas,
   onWilayaClick,
   onSelectionChange,
 }: UseWilayaMapParams) {
@@ -51,13 +55,15 @@ export function useWilayaMap({
 
   const updateSelection = React.useCallback(
     (next: string[]) => {
-      if (!selectedWilayas) {
+      if (setSelectedWilayas) {
+        setSelectedWilayas(next)
+      } else if (selectedWilayas === undefined) {
         setInternalSelected(next)
       }
 
       onSelectionChange?.(next)
     },
-    [selectedWilayas, onSelectionChange]
+    [setSelectedWilayas, selectedWilayas, onSelectionChange]
   )
 
   const toggleWilaya = React.useCallback(
