@@ -6,17 +6,18 @@
     {
       "name": "wilaya-map",
       "type": "registry:component",
-      "title": "Algeria Wilaya Wilaya Map",
-      "description": "Interactive Algeria wilaya map with selection, colors, zoom, pan, controls, and a usage guide.",
+      "title": "Algeria Wilaya Map",
+      "description": "Interactive Algeria wilaya map with composable sections, controlled selection, zoom, pan, controls, legend, and a usage guide.",
       "author": "Saadi Bella (https://github.com/MadMax55555)",
       "dependencies": [
         "lucide-react"
       ],
       "registryDependencies": [
+        "badge",
         "button",
         "card",
-        "badge",
-        "dialog"
+        "dialog",
+        "tooltip"
       ],
       "files": [
         {
@@ -25,9 +26,54 @@
           "target": "components/ui/wilaya-map.tsx"
         },
         {
+          "path": "registry/new-york/blocks/algeria-wilaya-map/components/wilaya-map-canvas.tsx",
+          "type": "registry:component",
+          "target": "components/ui/wilaya-map-canvas.tsx"
+        },
+        {
+          "path": "registry/new-york/blocks/algeria-wilaya-map/components/wilaya-map-footer.tsx",
+          "type": "registry:component",
+          "target": "components/ui/wilaya-map-footer.tsx"
+        },
+        {
+          "path": "registry/new-york/blocks/algeria-wilaya-map/components/wilaya-map-guide-dialog.tsx",
+          "type": "registry:component",
+          "target": "components/ui/wilaya-map-guide-dialog.tsx"
+        },
+        {
+          "path": "registry/new-york/blocks/algeria-wilaya-map/components/wilaya-map-header.tsx",
+          "type": "registry:component",
+          "target": "components/ui/wilaya-map-header.tsx"
+        },
+        {
+          "path": "registry/new-york/blocks/algeria-wilaya-map/components/wilaya-map-legend.tsx",
+          "type": "registry:component",
+          "target": "components/ui/wilaya-map-legend.tsx"
+        },
+        {
+          "path": "registry/new-york/blocks/algeria-wilaya-map/components/wilaya-map-selection.tsx",
+          "type": "registry:component",
+          "target": "components/ui/wilaya-map-selection.tsx"
+        },
+        {
+          "path": "registry/new-york/blocks/algeria-wilaya-map/components/wilaya-map-toolbar.tsx",
+          "type": "registry:component",
+          "target": "components/ui/wilaya-map-toolbar.tsx"
+        },
+        {
+          "path": "registry/new-york/blocks/algeria-wilaya-map/components/wilaya-map-viewport.tsx",
+          "type": "registry:component",
+          "target": "components/ui/wilaya-map-viewport.tsx"
+        },
+        {
           "path": "registry/new-york/blocks/algeria-wilaya-map/components/map-guide-dialog.tsx",
           "type": "registry:component",
           "target": "components/ui/map-guide-dialog.tsx"
+        },
+        {
+          "path": "registry/new-york/blocks/algeria-wilaya-map/context/wilaya-map-context.tsx",
+          "type": "registry:component",
+          "target": "components/ui/wilaya-map-context.tsx"
         },
         {
           "path": "registry/new-york/blocks/algeria-wilaya-map/data/algeria-wilayas.ts",

@@ -4,8 +4,8 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-import { useWilayaMapContext } from "../context/wilaya-map-context"
-import { BOTTOM_OVERLAY_SPACE } from "../utils/wilaya-map.utils"
+import { useWilayaMapContext } from "@/context/wilaya-map-context"
+import { BOTTOM_OVERLAY_SPACE } from "@/lib/wilaya-map.utils"
 
 export function WilayaMapViewport({
   className,

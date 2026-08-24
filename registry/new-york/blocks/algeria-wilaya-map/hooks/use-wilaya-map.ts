@@ -1,8 +1,6 @@
-"use client"
-
 import * as React from "react"
 
-import type { AlgeriaWilaya } from "../data/algeria-wilayas"
+import type { AlgeriaWilaya } from "@/lib/algeria-wilayas"
 
 import {
   MAX_SCALE,
@@ -12,7 +10,7 @@ import {
   getNextSelectedWilayas,
   getSelectedWilayaObjects,
   getWilayaFillColor,
-} from "../utils/wilaya-map.utils"
+} from "@/lib/wilaya-map.utils"
 
 type UseWilayaMapParams = {
   data: AlgeriaWilaya[]

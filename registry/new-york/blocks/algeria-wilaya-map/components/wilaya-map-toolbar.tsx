@@ -10,7 +10,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-import { useWilayaMapContext } from "../context/wilaya-map-context"
+import { useWilayaMapContext } from "@/context/wilaya-map-context"
 
 type ToolbarButtonProps = {
   label: string

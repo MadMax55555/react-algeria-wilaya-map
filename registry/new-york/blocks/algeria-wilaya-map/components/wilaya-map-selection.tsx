@@ -4,7 +4,7 @@ import { X } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 
-import { useWilayaMapContext } from "../context/wilaya-map-context"
+import { useWilayaMapContext } from "@/context/wilaya-map-context"
 
 type WilayaMapSelectionProps = {
   emptyMessage?: string
