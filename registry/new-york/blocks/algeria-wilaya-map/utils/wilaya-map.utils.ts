@@ -1,4 +1,4 @@
-import type { AlgeriaWilaya } from "@/lib/algeria-wilayas"
+import type { AlgeriaWilaya } from "../data/algeria-wilayas"
 
 export const MIN_SCALE = 1
 export const MAX_SCALE = 6

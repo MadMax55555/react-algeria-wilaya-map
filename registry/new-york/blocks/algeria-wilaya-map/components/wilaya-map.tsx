@@ -5,9 +5,9 @@ import * as React from "react"
 import {
   algeriaWilayas,
   type AlgeriaWilaya,
-} from "@/lib/algeria-wilayas"
-import { useWilayaMap } from "@/hooks/use-wilaya-map"
-import { WilayaMapProvider } from "@/components/ui/wilaya-map-context"
+} from "../data/algeria-wilayas"
+import { useWilayaMap } from "../hooks/use-wilaya-map"
+import { WilayaMapProvider } from "../context/wilaya-map-context"
 
 type WilayaMapProps = {
   children: React.ReactNode

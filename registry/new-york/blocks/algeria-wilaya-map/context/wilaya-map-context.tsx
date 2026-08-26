@@ -1,7 +1,7 @@
 import * as React from "react"
 
-import type { AlgeriaWilaya } from "@/lib/algeria-wilayas"
-import { useWilayaMap } from "@/hooks/use-wilaya-map"
+import type { AlgeriaWilaya } from "../data/algeria-wilayas"
+import { useWilayaMap } from "../hooks/use-wilaya-map"
 
 type WilayaMapContextValue = ReturnType<typeof useWilayaMap> & {
   data: AlgeriaWilaya[]

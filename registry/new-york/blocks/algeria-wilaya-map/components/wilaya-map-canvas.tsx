@@ -1,6 +1,6 @@
 "use client"
 
-import { useWilayaMapContext } from "@/context/wilaya-map-context"
+import { useWilayaMapContext } from "../context/wilaya-map-context"
 
 export function WilayaMapCanvas() {
   const {

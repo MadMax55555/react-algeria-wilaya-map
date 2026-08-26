@@ -23,72 +23,72 @@
         {
           "path": "registry/new-york/blocks/algeria-wilaya-map/components/wilaya-map.tsx",
           "type": "registry:component",
-          "target": "components/ui/wilaya-map.tsx"
+          "target": "components/ui/wilaya-map/index.ts"
         },
         {
           "path": "registry/new-york/blocks/algeria-wilaya-map/components/wilaya-map-canvas.tsx",
           "type": "registry:component",
-          "target": "components/ui/wilaya-map-canvas.tsx"
+          "target": "components/ui/wilaya-map/components/wilaya-map-canvas.tsx"
         },
         {
           "path": "registry/new-york/blocks/algeria-wilaya-map/components/wilaya-map-footer.tsx",
           "type": "registry:component",
-          "target": "components/ui/wilaya-map-footer.tsx"
+          "target": "components/ui/wilaya-map/components/wilaya-map-footer.tsx"
         },
         {
           "path": "registry/new-york/blocks/algeria-wilaya-map/components/wilaya-map-guide-dialog.tsx",
           "type": "registry:component",
-          "target": "components/ui/wilaya-map-guide-dialog.tsx"
+          "target": "components/ui/wilaya-map/components/wilaya-map-guide-dialog.tsx"
         },
         {
           "path": "registry/new-york/blocks/algeria-wilaya-map/components/wilaya-map-header.tsx",
           "type": "registry:component",
-          "target": "components/ui/wilaya-map-header.tsx"
+          "target": "components/ui/wilaya-map/components/wilaya-map-header.tsx"
         },
         {
           "path": "registry/new-york/blocks/algeria-wilaya-map/components/wilaya-map-legend.tsx",
           "type": "registry:component",
-          "target": "components/ui/wilaya-map-legend.tsx"
+          "target": "components/ui/wilaya-map/components/wilaya-map-legend.tsx"
         },
         {
           "path": "registry/new-york/blocks/algeria-wilaya-map/components/wilaya-map-selection.tsx",
           "type": "registry:component",
-          "target": "components/ui/wilaya-map-selection.tsx"
+          "target": "components/ui/wilaya-map/components/wilaya-map-selection.tsx"
         },
         {
           "path": "registry/new-york/blocks/algeria-wilaya-map/components/wilaya-map-toolbar.tsx",
           "type": "registry:component",
-          "target": "components/ui/wilaya-map-toolbar.tsx"
+          "target": "components/ui/wilaya-map/components/wilaya-map-toolbar.tsx"
         },
         {
           "path": "registry/new-york/blocks/algeria-wilaya-map/components/wilaya-map-viewport.tsx",
           "type": "registry:component",
-          "target": "components/ui/wilaya-map-viewport.tsx"
+          "target": "components/ui/wilaya-map/components/wilaya-map-viewport.tsx"
         },
         {
           "path": "registry/new-york/blocks/algeria-wilaya-map/components/map-guide-dialog.tsx",
           "type": "registry:component",
-          "target": "components/ui/map-guide-dialog.tsx"
+          "target": "components/ui/wilaya-map/components/map-guide-dialog.tsx"
         },
         {
           "path": "registry/new-york/blocks/algeria-wilaya-map/context/wilaya-map-context.tsx",
           "type": "registry:component",
-          "target": "components/ui/wilaya-map-context.tsx"
+          "target": "components/ui/wilaya-map/context/wilaya-map-context.tsx"
         },
         {
           "path": "registry/new-york/blocks/algeria-wilaya-map/data/algeria-wilayas.ts",
           "type": "registry:lib",
-          "target": "lib/algeria-wilayas.ts"
+          "target": "components/ui/wilaya-map/data/algeria-wilayas.ts"
         },
         {
           "path": "registry/new-york/blocks/algeria-wilaya-map/hooks/use-wilaya-map.ts",
           "type": "registry:hook",
-          "target": "hooks/use-wilaya-map.ts"
+          "target": "components/ui/wilaya-map/hooks/use-wilaya-map.ts"
         },
         {
           "path": "registry/new-york/blocks/algeria-wilaya-map/utils/wilaya-map.utils.ts",
           "type": "registry:lib",
-          "target": "lib/wilaya-map.utils.ts"
+          "target": "components/ui/wilaya-map/utils/wilaya-map.utils.ts"
         }
       ]
     }
