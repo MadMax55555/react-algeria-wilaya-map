@@ -6,6 +6,18 @@ export const ZOOM_STEP = 0.5
 export const PAN_STEP = 1
 export const BOTTOM_OVERLAY_SPACE = 116
 
+export type WilayaMapSelectionMode = "single" | "multiple" | "none"
+
+type GetNextSelectedWilayasParams = {
+  selected: string[]
+  wilayaId: string
+  selectionMode: WilayaMapSelectionMode
+  multiSelectWithModifier: boolean
+  clearable: boolean
+  minSelection: number
+  maxSelection?: number
+}
+
 export function getWilayaFillColor({
   wilayaId,
   selected,
@@ -38,23 +50,39 @@ export function getSelectedWilayaObjects(
 export function getNextSelectedWilayas({
   selected,
   wilayaId,
-  selectable,
-  multiSelect,
-}: {
-  selected: string[]
-  wilayaId: string
-  selectable: boolean
-  multiSelect: boolean
-}) {
-  if (!selectable) {
+  selectionMode,
+  multiSelectWithModifier,
+  clearable,
+  minSelection,
+  maxSelection,
+}: GetNextSelectedWilayasParams): string[] {
+  if (selectionMode === "none") {
     return selected
   }
 
-  if (multiSelect) {
-    return selected.includes(wilayaId)
-      ? selected.filter((item) => item !== wilayaId)
-      : [...selected, wilayaId]
+  const isSelected = selected.includes(wilayaId)
+  const canDeselect = clearable && selected.length > minSelection
+
+  const allowsMultipleSelection =
+    selectionMode === "multiple" || multiSelectWithModifier
+
+  if (!allowsMultipleSelection) {
+    if (isSelected) {
+      return canDeselect ? [] : selected
+    }
+
+    return [wilayaId]
   }
 
-  return selected.length === 1 && selected[0] === wilayaId ? [] : [wilayaId]
+  if (isSelected) {
+    return canDeselect
+      ? selected.filter((id) => id !== wilayaId)
+      : selected
+  }
+
+  if (maxSelection !== undefined && selected.length >= maxSelection) {
+    return selected
+  }
+
+  return [...selected, wilayaId]
 }

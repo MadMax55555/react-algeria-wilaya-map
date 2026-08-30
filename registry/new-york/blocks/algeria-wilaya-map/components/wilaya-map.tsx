@@ -6,8 +6,9 @@ import {
   algeriaWilayas,
   type AlgeriaWilaya,
 } from "../data/algeria-wilayas"
-import { useWilayaMap } from "../hooks/use-wilaya-map"
 import { WilayaMapProvider } from "../context/wilaya-map-context"
+import { useWilayaMap } from "../hooks/use-wilaya-map"
+import type { WilayaMapSelectionMode } from "../utils/wilaya-map.utils"
 
 type WilayaMapProps = {
   children: React.ReactNode
@@ -17,9 +18,16 @@ type WilayaMapProps = {
   selectedColor?: string
   strokeColor?: string
   height?: number
-  selectable?: boolean
+
+  selectionMode?: WilayaMapSelectionMode
+  clearable?: boolean
+  minSelection?: number
+  maxSelection?: number
+  modifierKeyMultiSelect?: boolean
+
   selectedWilayas?: string[]
   setSelectedWilayas?: React.Dispatch<React.SetStateAction<string[]>>
+
   onWilayaClick?: (wilaya: AlgeriaWilaya) => void
   onSelectionChange?: (selectedIds: string[]) => void
 }
@@ -32,18 +40,37 @@ export function WilayaMap({
   selectedColor = "#15803d",
   strokeColor = "#ffffff",
   height = 560,
-  selectable = true,
+
+  selectionMode = "single",
+  clearable = true,
+  minSelection = 0,
+  maxSelection,
+  modifierKeyMultiSelect = true,
+
   selectedWilayas,
   setSelectedWilayas,
   onWilayaClick,
   onSelectionChange,
 }: WilayaMapProps) {
+  const normalizedMinSelection = Math.max(0, minSelection)
+
+  const normalizedMaxSelection =
+    maxSelection === undefined
+      ? undefined
+      : Math.max(normalizedMinSelection, maxSelection)
+
   const map = useWilayaMap({
     data,
     wilayaColors,
     defaultColor,
     selectedColor,
-    selectable,
+
+    selectionMode,
+    clearable,
+    minSelection: normalizedMinSelection,
+    maxSelection: normalizedMaxSelection,
+    modifierKeyMultiSelect,
+
     selectedWilayas,
     setSelectedWilayas,
     onWilayaClick,
@@ -54,12 +81,11 @@ export function WilayaMap({
     () => ({
       ...map,
       data,
-      selectable,
       strokeColor,
       selectedColor,
       height,
     }),
-    [map, data, selectable, strokeColor, selectedColor, height]
+    [map, data, strokeColor, selectedColor, height]
   )
 
   return (

@@ -1,3 +1,5 @@
+"use client"
+
 import * as React from "react"
 
 import type { AlgeriaWilaya } from "../data/algeria-wilayas"
@@ -7,17 +9,28 @@ import {
   MIN_SCALE,
   PAN_STEP,
   ZOOM_STEP,
+  type WilayaMapSelectionMode,
   getNextSelectedWilayas,
   getSelectedWilayaObjects,
   getWilayaFillColor,
 } from "../utils/wilaya-map.utils"
+
+type WilayaMapInteractionEvent = Pick<
+  React.MouseEvent<SVGPathElement> | React.KeyboardEvent<SVGPathElement>,
+  "altKey" | "ctrlKey" | "metaKey"
+>
 
 type UseWilayaMapParams = {
   data: AlgeriaWilaya[]
   wilayaColors?: Partial<Record<string, string>>
   defaultColor: string
   selectedColor: string
-  selectable: boolean
+
+  selectionMode: WilayaMapSelectionMode
+  clearable: boolean
+  minSelection: number
+  maxSelection?: number
+  modifierKeyMultiSelect: boolean
 
   selectedWilayas?: string[]
   setSelectedWilayas?: React.Dispatch<React.SetStateAction<string[]>>
@@ -31,7 +44,11 @@ export function useWilayaMap({
   wilayaColors,
   defaultColor,
   selectedColor,
-  selectable,
+  selectionMode,
+  clearable,
+  minSelection,
+  maxSelection,
+  modifierKeyMultiSelect,
   selectedWilayas,
   setSelectedWilayas,
   onWilayaClick,
@@ -65,30 +82,55 @@ export function useWilayaMap({
   )
 
   const toggleWilaya = React.useCallback(
-    (wilaya: AlgeriaWilaya, multiSelect: boolean) => {
+    (wilaya: AlgeriaWilaya, event: WilayaMapInteractionEvent) => {
       const id = String(wilaya.id)
+
+      const isModifierPressed =
+        event.altKey || event.ctrlKey || event.metaKey
 
       const next = getNextSelectedWilayas({
         selected,
         wilayaId: id,
-        selectable,
-        multiSelect,
+        selectionMode,
+        multiSelectWithModifier:
+          modifierKeyMultiSelect && isModifierPressed,
+        clearable,
+        minSelection,
+        maxSelection,
       })
 
-      if (selectable) {
+      if (selectionMode !== "none") {
         updateSelection(next)
       }
 
       onWilayaClick?.(wilaya)
     },
-    [selected, selectable, updateSelection, onWilayaClick]
+    [
+      selected,
+      selectionMode,
+      modifierKeyMultiSelect,
+      clearable,
+      minSelection,
+      maxSelection,
+      updateSelection,
+      onWilayaClick,
+    ]
   )
 
   const removeWilaya = React.useCallback(
     (id: string) => {
+      const canRemove =
+        selectionMode !== "none" &&
+        clearable &&
+        selected.length > minSelection
+
+      if (!canRemove) {
+        return
+      }
+
       updateSelection(selected.filter((item) => item !== id))
     },
-    [selected, updateSelection]
+    [selectionMode, clearable, minSelection, selected, updateSelection]
   )
 
   const selectedWilayaObjects = React.useMemo(
@@ -110,14 +152,20 @@ export function useWilayaMap({
 
   const getSvgPoint = React.useCallback((clientX: number, clientY: number) => {
     const svg = svgRef.current
-    if (!svg) return null
+
+    if (!svg) {
+      return null
+    }
 
     const point = svg.createSVGPoint()
     point.x = clientX
     point.y = clientY
 
     const ctm = svg.getScreenCTM()
-    if (!ctm) return null
+
+    if (!ctm) {
+      return null
+    }
 
     return point.matrixTransform(ctm.inverse())
   }, [])
@@ -125,7 +173,10 @@ export function useWilayaMap({
   const zoomAtPoint = React.useCallback(
     (clientX: number, clientY: number, nextScale: number) => {
       const svgPoint = getSvgPoint(clientX, clientY)
-      if (!svgPoint) return
+
+      if (!svgPoint) {
+        return
+      }
 
       setTransform((previous) => {
         const scale = Math.min(
@@ -152,7 +203,10 @@ export function useWilayaMap({
 
   const zoomIn = React.useCallback(() => {
     const wrapper = mapContainerRef.current
-    if (!wrapper) return
+
+    if (!wrapper) {
+      return
+    }
 
     const rect = wrapper.getBoundingClientRect()
 
@@ -165,7 +219,10 @@ export function useWilayaMap({
 
   const zoomOut = React.useCallback(() => {
     const wrapper = mapContainerRef.current
-    if (!wrapper) return
+
+    if (!wrapper) {
+      return
+    }
 
     const rect = wrapper.getBoundingClientRect()
 
@@ -177,15 +234,24 @@ export function useWilayaMap({
   }, [transform.scale, zoomAtPoint])
 
   const resetTransform = React.useCallback(() => {
-    setTransform({ scale: 1, x: 0, y: 0 })
+    setTransform({
+      scale: 1,
+      x: 0,
+      y: 0,
+    })
   }, [])
 
   React.useEffect(() => {
     const wrapper = mapContainerRef.current
-    if (!wrapper) return
+
+    if (!wrapper) {
+      return
+    }
 
     const handleWheel = (event: WheelEvent) => {
-      if (!isPointerInside) return
+      if (!isPointerInside) {
+        return
+      }
 
       event.preventDefault()
       event.stopPropagation()
@@ -227,15 +293,23 @@ export function useWilayaMap({
   return {
     mapContainerRef,
     svgRef,
+
     selected,
+    selectionMode,
+    clearable,
+    minSelection,
+    maxSelection,
+
     transform,
     isGuideOpen,
     setIsGuideOpen,
     setIsPointerInside,
+
     selectedWilayaObjects,
     getWilayaFill,
     toggleWilaya,
     removeWilaya,
+
     zoomIn,
     zoomOut,
     resetTransform,

@@ -8,12 +8,14 @@ export function WilayaMapCanvas() {
     data,
     selected,
     transform,
-    selectable,
+    selectionMode,
     strokeColor,
     selectedColor,
     getWilayaFill,
     toggleWilaya,
   } = useWilayaMapContext()
+
+  const isSelectionEnabled = selectionMode !== "none"
 
   return (
     <svg
@@ -29,7 +31,6 @@ export function WilayaMapCanvas() {
         {data.map((wilaya) => {
           const id = String(wilaya.id)
           const isSelected = selected.includes(id)
-          const isInteractive = selectable
 
           return (
             <path
@@ -44,24 +45,26 @@ export function WilayaMapCanvas() {
               }
               className={[
                 "outline-none transition-opacity duration-200",
-                isInteractive
+                isSelectionEnabled
                   ? "cursor-pointer hover:opacity-80 focus:opacity-80"
                   : "",
               ].join(" ")}
               onClick={(event) => {
                 event.stopPropagation()
-                toggleWilaya(wilaya, event.altKey)
+                toggleWilaya(wilaya, event)
               }}
               onKeyDown={(event) => {
                 if (event.key === "Enter" || event.key === " ") {
                   event.preventDefault()
-                  toggleWilaya(wilaya, event.altKey)
+                  toggleWilaya(wilaya, event)
                 }
               }}
-              tabIndex={isInteractive ? 0 : -1}
-              role={isInteractive ? "button" : undefined}
+              tabIndex={isSelectionEnabled ? 0 : -1}
+              role={isSelectionEnabled ? "button" : undefined}
               aria-label={wilaya.name}
-              aria-pressed={selectable ? isSelected : undefined}
+              aria-pressed={
+                isSelectionEnabled ? isSelected : undefined
+              }
             >
               <title>{wilaya.name}</title>
             </path>
