@@ -1,9 +1,12 @@
 "use client"
 
 import * as React from "react"
+import { Check, Clipboard, RotateCcw } from "lucide-react"
 
 import { OpenInV0Button } from "@/components/open-in-v0-button"
 import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
 import {
   algeriaWilayas,
   type AlgeriaWilaya,
@@ -20,461 +23,618 @@ import WilayaMap, {
 } from "@/registry/new-york/blocks/algeria-wilaya-map/components/wilaya-map"
 import type { WilayaMapSelectionMode } from "@/registry/new-york/blocks/algeria-wilaya-map/utils/wilaya-map.utils"
 
-const DEFAULT_COLORS = {
+const WILAYA_COLORS = {
   "16": "#60a5fa",
   "31": "#f97316",
   "25": "#a78bfa",
   "06": "#f43f5e",
 }
 
-type TestCase = {
+type PlaygroundConfig = {
+  selectionMode: WilayaMapSelectionMode
+  clearable: boolean
+  modifierKeyMultiSelect: boolean
+  minSelection: number
+  maxSelection: number
+  defaultColor: string
+  selectedColor: string
+  strokeColor: string
+  showHeader: boolean
+  showToolbar: boolean
+  showLegend: boolean
+  showSelection: boolean
+  showFooter: boolean
+  showGuide: boolean
+}
+
+const INITIAL_CONFIG: PlaygroundConfig = {
+  selectionMode: "single",
+  clearable: true,
+  modifierKeyMultiSelect: true,
+  minSelection: 0,
+  maxSelection: 0,
+  defaultColor: "#86efac",
+  selectedColor: "#15803d",
+  strokeColor: "#ffffff",
+  showHeader: true,
+  showToolbar: true,
+  showLegend: true,
+  showSelection: true,
+  showFooter: true,
+  showGuide: true,
+}
+
+type ToggleFieldProps = {
   id: string
   label: string
-  description: string
+  description?: string
+  checked: boolean
+  disabled?: boolean
+  onCheckedChange: (checked: boolean) => void
 }
 
-const TEST_CASES: TestCase[] = [
-  {
-    id: "single",
-    label: "Single selection",
-    description:
-      "A normal click selects one Wilaya and replaces the previous selection.",
-  },
-  {
-    id: "multiple",
-    label: "Multiple selection",
-    description:
-      "Every click adds or removes a Wilaya without requiring a modifier key.",
-  },
-  {
-    id: "modifier",
-    label: "Single + modifier multi-select",
-    description:
-      "Normal click selects one. Alt, Ctrl, or Command click adds/removes extra Wilayas.",
-  },
-  {
-    id: "none",
-    label: "Read-only map",
-    description:
-      "The map remains visible and navigable, but clicking Wilayas does not change selection.",
-  },
-  {
-    id: "required",
-    label: "Required selection",
-    description:
-      "At least one Wilaya must stay selected. Removing the final Wilaya is blocked.",
-  },
-  {
-    id: "max-three",
-    label: "Maximum 3 selections",
-    description:
-      "A fourth Wilaya cannot be added after three Wilayas are selected.",
-  },
-  {
-    id: "not-clearable",
-    label: "Not clearable",
-    description:
-      "Selected Wilayas cannot be removed by clicking the map or selection chips.",
-  },
-  {
-    id: "minimal",
-    label: "Minimal composition",
-    description:
-      "Only the required map root, viewport, and canvas are rendered.",
-  },
-  {
-    id: "uncontrolled",
-    label: "Uncontrolled selection",
-    description:
-      "The component stores selection internally because no external selected state is passed.",
-  },
-]
-
-function getSelectedNames(selectedIds: string[]) {
-  return algeriaWilayas
-    .filter((wilaya) => selectedIds.includes(String(wilaya.id)))
-    .map((wilaya) => wilaya.name)
-}
-
-function TestCaseButton({
-  testCase,
-  activeCase,
-  onClick,
-}: {
-  testCase: TestCase
-  activeCase: string
-  onClick: () => void
-}) {
-  const isActive = activeCase === testCase.id
-
+function ToggleField({
+  id,
+  label,
+  description,
+  checked,
+  disabled = false,
+  onCheckedChange,
+}: ToggleFieldProps) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
+    <div
       className={[
-        "rounded-md border px-3 py-2 text-left text-sm transition-colors",
-        isActive
-          ? "border-primary bg-primary text-primary-foreground"
-          : "bg-background hover:bg-muted",
+        "flex items-start justify-between gap-4 border-b py-3 last:border-b-0",
+        disabled ? "opacity-50" : "",
       ].join(" ")}
     >
-      <span className="block font-medium">{testCase.label}</span>
-      <span
-        className={[
-          "mt-1 block text-xs",
-          isActive
-            ? "text-primary-foreground/80"
-            : "text-muted-foreground",
-        ].join(" ")}
-      >
-        {testCase.description}
-      </span>
-    </button>
+      <div className="space-y-1">
+        <Label
+          htmlFor={id}
+          className={[
+            "text-sm font-medium",
+            disabled ? "cursor-not-allowed" : "cursor-pointer",
+          ].join(" ")}
+        >
+          {label}
+        </Label>
+
+        {description ? (
+          <p className="text-xs text-muted-foreground">{description}</p>
+        ) : null}
+      </div>
+
+      <Switch
+        id={id}
+        checked={checked}
+        disabled={disabled}
+        onCheckedChange={onCheckedChange}
+      />
+    </div>
   )
 }
 
-function MapComposition({
-  selectedWilayas,
-  setSelectedWilayas,
-  selectionMode,
-  clearable,
-  minSelection,
-  maxSelection,
-  modifierKeyMultiSelect,
-  showHeader = true,
-  showToolbar = true,
-  showLegend = true,
-  showSelection = true,
-  showFooter = true,
-  showGuide = true,
-  onWilayaClick,
-  onSelectionChange,
-}: {
-  selectedWilayas?: string[]
-  setSelectedWilayas?: React.Dispatch<React.SetStateAction<string[]>>
-  selectionMode?: WilayaMapSelectionMode
-  clearable?: boolean
-  minSelection?: number
-  maxSelection?: number
-  modifierKeyMultiSelect?: boolean
-  showHeader?: boolean
-  showToolbar?: boolean
-  showLegend?: boolean
-  showSelection?: boolean
-  showFooter?: boolean
-  showGuide?: boolean
-  onWilayaClick?: (wilaya: AlgeriaWilaya) => void
-  onSelectionChange?: (selectedIds: string[]) => void
-}) {
+type ColorFieldProps = {
+  id: string
+  label: string
+  value: string
+  onChange: (value: string) => void
+}
+
+function ColorField({
+  id,
+  label,
+  value,
+  onChange,
+}: ColorFieldProps) {
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={id}>{label}</Label>
+
+      <div className="flex items-center gap-2">
+        <input
+          id={id}
+          type="color"
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className="h-9 w-11 cursor-pointer rounded border bg-transparent p-1"
+        />
+
+        <input
+          type="text"
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className="h-9 min-w-0 flex-1 rounded-md border bg-background px-3 font-mono text-sm"
+          aria-label={`${label} hex value`}
+        />
+      </div>
+    </div>
+  )
+}
+
+function generateMapCode(config: PlaygroundConfig) {
+  const props = [
+    `selectionMode="${config.selectionMode}"`,
+    !config.clearable ? "clearable={false}" : null,
+    config.minSelection > 0
+      ? `minSelection={${config.minSelection}}`
+      : null,
+    config.maxSelection > 0
+      ? `maxSelection={${config.maxSelection}}`
+      : null,
+    !config.modifierKeyMultiSelect
+      ? "modifierKeyMultiSelect={false}"
+      : null,
+    `defaultColor="${config.defaultColor}"`,
+    `selectedColor="${config.selectedColor}"`,
+    `strokeColor="${config.strokeColor}"`,
+  ]
+    .filter(Boolean)
+    .map((prop) => `      ${prop}`)
+    .join("\n")
+
+  const header = config.showHeader
+    ? `
+      <WilayaMapHeader
+        title="Choose service areas"
+        description="Select one or more wilayas where your team operates."
+      />
+`
+    : ""
+
+  const toolbar = config.showToolbar
+    ? `
+        <WilayaMapToolbar />`
+    : ""
+
+  const legend = config.showLegend
+    ? `
+        <WilayaMapLegend
+          items={[
+            { label: "Available", color: "${config.defaultColor}" },
+            { label: "Algiers priority", color: "#60a5fa" },
+            { label: "Oran priority", color: "#f97316" },
+            { label: "Selected", color: "${config.selectedColor}" },
+          ]}
+        />`
+    : ""
+
+  const selection = config.showSelection
+    ? `
+        <WilayaMapSelection emptyMessage="No service area selected" />`
+    : ""
+
+  const footer = config.showFooter
+    ? `
+      <WilayaMapFooter>
+        Hold <kbd>Alt</kbd> while clicking to multi-select.
+      </WilayaMapFooter>
+`
+    : ""
+
+  const guide = config.showGuide
+    ? `
+      <WilayaMapGuideDialog />`
+    : ""
+
+  return `import * as React from "react"
+
+import WilayaMap, {
+  WilayaMapCanvas,
+  WilayaMapFooter,
+  WilayaMapGuideDialog,
+  WilayaMapHeader,
+  WilayaMapLegend,
+  WilayaMapSelection,
+  WilayaMapToolbar,
+  WilayaMapViewport,
+} from "@/components/algeria-wilaya-map"
+
+export function ServiceAreaMap() {
+  const [selectedWilayas, setSelectedWilayas] = React.useState<string[]>([])
+
   return (
     <WilayaMap
       selectedWilayas={selectedWilayas}
       setSelectedWilayas={setSelectedWilayas}
-      selectionMode={selectionMode}
-      clearable={clearable}
-      minSelection={minSelection}
-      maxSelection={maxSelection}
-      modifierKeyMultiSelect={modifierKeyMultiSelect}
-      defaultColor="#86efac"
-      selectedColor="#15803d"
-      wilayaColors={DEFAULT_COLORS}
-      onWilayaClick={onWilayaClick}
-      onSelectionChange={onSelectionChange}
-    >
-      {showHeader ? (
-        <WilayaMapHeader
-          title="Choose service areas"
-          description="Select Algerian Wilayas where your field-service team operates."
-        />
-      ) : null}
-
+${props}
+      wilayaColors={{
+        "16": "#60a5fa",
+        "31": "#f97316",
+      }}
+    >${header}
       <WilayaMapViewport>
-        <WilayaMapCanvas />
-
-        {showToolbar ? <WilayaMapToolbar /> : null}
-
-        {showLegend ? (
-          <WilayaMapLegend
-            items={[
-              { label: "Available", color: "#86efac" },
-              { label: "Algiers priority", color: "#60a5fa" },
-              { label: "Oran priority", color: "#f97316" },
-              { label: "Biskra priority", color: "#a78bfa" },
-              { label: "Selected", color: "#15803d" },
-            ]}
-          />
-        ) : null}
-
-        {showSelection ? (
-          <WilayaMapSelection emptyMessage="No service area selected" />
-        ) : null}
-      </WilayaMapViewport>
-
-      {showFooter ? (
-        <WilayaMapFooter>
-          Hold{" "}
-          <kbd className="rounded border bg-background px-1.5 py-0.5 font-mono text-xs text-foreground">
-            Alt
-          </kbd>
-          ,{" "}
-          <kbd className="rounded border bg-background px-1.5 py-0.5 font-mono text-xs text-foreground">
-            Ctrl
-          </kbd>
-          , or{" "}
-          <kbd className="rounded border bg-background px-1.5 py-0.5 font-mono text-xs text-foreground">
-            ⌘
-          </kbd>{" "}
-          while clicking to temporarily multi-select in single-selection mode.
-        </WilayaMapFooter>
-      ) : null}
-
-      {showGuide ? <WilayaMapGuideDialog /> : null}
+        <WilayaMapCanvas />${toolbar}${legend}${selection}
+      </WilayaMapViewport>${footer}${guide}
     </WilayaMap>
   )
-}
-
-function UncontrolledMapDemo() {
-  const [lastSelection, setLastSelection] = React.useState<string[]>([])
-
-  return (
-    <div className="space-y-4">
-      <MapComposition
-        selectionMode="multiple"
-        onSelectionChange={setLastSelection}
-      />
-
-      <SelectionStatePanel
-        title="Internal selection callback"
-        selectedWilayas={lastSelection}
-      />
-    </div>
-  )
-}
-
-function SelectionStatePanel({
-  title,
-  selectedWilayas,
-  lastClickedWilaya,
-}: {
-  title: string
-  selectedWilayas: string[]
-  lastClickedWilaya?: AlgeriaWilaya | null
-}) {
-  const selectedNames = getSelectedNames(selectedWilayas)
-
-  return (
-    <div className="rounded-lg border bg-muted/30 p-4">
-      <h3 className="font-medium">{title}</h3>
-
-      <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
-        <div>
-          <dt className="text-muted-foreground">Selected IDs</dt>
-          <dd className="mt-1 font-mono text-foreground">
-            {selectedWilayas.length > 0
-              ? selectedWilayas.join(", ")
-              : "None"}
-          </dd>
-        </div>
-
-        <div>
-          <dt className="text-muted-foreground">Selected Wilayas</dt>
-          <dd className="mt-1 font-medium text-foreground">
-            {selectedNames.length > 0
-              ? selectedNames.join(", ")
-              : "None"}
-          </dd>
-        </div>
-
-        {lastClickedWilaya ? (
-          <div>
-            <dt className="text-muted-foreground">Last clicked Wilaya</dt>
-            <dd className="mt-1 font-medium text-foreground">
-              {lastClickedWilaya.name} ({lastClickedWilaya.id})
-            </dd>
-          </div>
-        ) : null}
-      </dl>
-    </div>
-  )
+}`
 }
 
 export default function Home() {
-  const [activeCase, setActiveCase] = React.useState("single")
+  const [config, setConfig] = React.useState<PlaygroundConfig>(INITIAL_CONFIG)
   const [selectedWilayas, setSelectedWilayas] = React.useState<string[]>([])
   const [lastClickedWilaya, setLastClickedWilaya] =
     React.useState<AlgeriaWilaya | null>(null)
-  const [selectionEvents, setSelectionEvents] = React.useState<string[]>([])
+  const [hasCopied, setHasCopied] = React.useState(false)
 
-  const activeTestCase = TEST_CASES.find(
-    (testCase) => testCase.id === activeCase
-  )
-
-  const resetDemo = React.useCallback(() => {
-    setSelectedWilayas([])
-    setLastClickedWilaya(null)
-    setSelectionEvents([])
-  }, [])
-
-  const handleSelectionChange = React.useCallback((next: string[]) => {
-    setSelectionEvents((previous) => [
-      `${new Date().toLocaleTimeString()}: [${next.join(", ")}]`,
+  const updateConfig = <Key extends keyof PlaygroundConfig>(
+    key: Key,
+    value: PlaygroundConfig[Key]
+  ) => {
+    setConfig((previous) => ({
       ...previous,
-    ].slice(0, 6))
-  }, [])
-
-  const commonProps = {
-    selectedWilayas,
-    setSelectedWilayas,
-    onWilayaClick: setLastClickedWilaya,
-    onSelectionChange: handleSelectionChange,
+      [key]: value,
+    }))
   }
 
-  function renderActiveMap() {
-    switch (activeCase) {
-      case "multiple":
-        return (
-          <MapComposition
-            {...commonProps}
-            selectionMode="multiple"
-          />
-        )
+  const normalizedMinSelection = Math.max(0, config.minSelection)
 
-      case "modifier":
-        return (
-          <MapComposition
-            {...commonProps}
-            selectionMode="single"
-            modifierKeyMultiSelect
-            maxSelection={3}
-          />
-        )
+  const maxSelection =
+    config.maxSelection > 0
+      ? Math.max(normalizedMinSelection, config.maxSelection)
+      : undefined
 
-      case "none":
-        return (
-          <MapComposition
-            {...commonProps}
-            selectionMode="none"
-          />
-        )
+  const selectedNames = React.useMemo(() => {
+    return algeriaWilayas
+      .filter((wilaya) => selectedWilayas.includes(String(wilaya.id)))
+      .map((wilaya) => wilaya.name)
+  }, [selectedWilayas])
 
-      case "required":
-        return (
-          <MapComposition
-            {...commonProps}
-            selectionMode="single"
-            clearable={false}
-            minSelection={1}
-          />
-        )
+  const generatedCode = React.useMemo(
+    () => generateMapCode(config),
+    [config]
+  )
 
-      case "max-three":
-        return (
-          <MapComposition
-            {...commonProps}
-            selectionMode="multiple"
-            maxSelection={3}
-          />
-        )
+  const resetPlayground = () => {
+    setConfig(INITIAL_CONFIG)
+    setSelectedWilayas([])
+    setLastClickedWilaya(null)
+    setHasCopied(false)
+  }
 
-      case "not-clearable":
-        return (
-          <MapComposition
-            {...commonProps}
-            selectionMode="multiple"
-            clearable={false}
-          />
-        )
+  const copyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(generatedCode)
+      setHasCopied(true)
 
-      case "minimal":
-        return (
-          <WilayaMap
-            {...commonProps}
-            selectionMode="multiple"
-            defaultColor="#86efac"
-            selectedColor="#15803d"
-          >
-            <WilayaMapViewport>
-              <WilayaMapCanvas />
-            </WilayaMapViewport>
-          </WilayaMap>
-        )
-
-      case "uncontrolled":
-        return <UncontrolledMapDemo />
-
-      case "single":
-      default:
-        return (
-          <MapComposition
-            {...commonProps}
-            selectionMode="single"
-          />
-        )
+      window.setTimeout(() => {
+        setHasCopied(false)
+      }, 1800)
+    } catch {
+      setHasCopied(false)
     }
   }
 
-  return (
-    <div className="mx-auto flex min-h-svh max-w-6xl flex-col gap-8 px-4 py-8">
-      <header className="flex flex-col gap-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">
-              Custom Registry Playground
-            </p>
-            <h1 className="text-3xl font-bold tracking-tight">
-              Algeria Wilaya Map Test Lab
-            </h1>
-          </div>
+  const isReadOnly = config.selectionMode === "none"
+  const modifierKeyAvailable = config.selectionMode === "single"
+  const limitsAvailable = config.selectionMode !== "none"
 
-          <OpenInV0Button
-            name="algeria-wilaya-map"
-            className="w-fit"
-          />
+  return (
+    <main className="mx-auto min-h-svh max-w-7xl px-4 py-6 sm:py-8">
+      <header className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-sm font-medium text-muted-foreground">
+            Custom Registry
+          </p>
+
+          <h1 className="mt-1 text-3xl font-bold tracking-tight">
+            Algeria Wilaya Map
+          </h1>
+
+          <p className="mt-2 max-w-2xl text-muted-foreground">
+            Configure map props, inspect the live preview, and copy the
+            generated integration code.
+          </p>
         </div>
 
-        <p className="max-w-3xl text-muted-foreground">
-          Use this page to manually validate selection behavior, compound
-          component composition, controlled state, and map interactions before
-          publishing the registry item.
-        </p>
+        <OpenInV0Button
+          name="algeria-wilaya-map"
+          className="w-fit"
+        />
       </header>
 
-      <main className="grid flex-1 gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
-        <aside className="h-fit rounded-lg border bg-card p-3 lg:sticky lg:top-4">
-          <div className="mb-3 px-2">
-            <h2 className="font-semibold">Test scenarios</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Choose one scenario, then interact with the map.
-            </p>
-          </div>
+      <div className="grid items-start gap-6 xl:grid-cols-[340px_minmax(0,1fr)] xl:items-start">
+        <aside className="xl:sticky xl:top-4 xl:self-start">
+          <div className="rounded-xl border bg-card shadow-sm">
+            <div className="flex items-start justify-between gap-3 border-b px-4 py-4">
+              <div>
+                <h2 className="font-semibold">Configuration</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Change props without losing the map preview.
+                </p>
+              </div>
 
-          <div className="flex flex-col gap-2">
-            {TEST_CASES.map((testCase) => (
-              <TestCaseButton
-                key={testCase.id}
-                testCase={testCase}
-                activeCase={activeCase}
-                onClick={() => {
-                  setActiveCase(testCase.id)
-                  resetDemo()
-                }}
-              />
-            ))}
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={resetPlayground}
+                aria-label="Reset map configuration"
+              >
+                <RotateCcw className="size-4" />
+              </Button>
+            </div>
+
+            <nav
+              className="flex gap-2 overflow-x-auto border-b px-4 py-2 text-xs"
+              aria-label="Configuration sections"
+            >
+              <a
+                href="#selection-controls"
+                className="rounded-md bg-muted px-2 py-1 whitespace-nowrap transition-colors hover:bg-muted/70"
+              >
+                Selection
+              </a>
+
+              <a
+                href="#color-controls"
+                className="rounded-md bg-muted px-2 py-1 whitespace-nowrap transition-colors hover:bg-muted/70"
+              >
+                Colors
+              </a>
+
+              <a
+                href="#section-controls"
+                className="rounded-md bg-muted px-2 py-1 whitespace-nowrap transition-colors hover:bg-muted/70"
+              >
+                Sections
+              </a>
+            </nav>
+
+            <div
+              id="sidebar-scroll"
+              className="max-h-[calc(100svh-12rem)] overflow-y-auto px-4 pb-4"
+            >
+              <div className="space-y-6 pt-4">
+                <section
+                  id="selection-controls"
+                  className="scroll-mt-4 space-y-3"
+                >
+                  <div>
+                    <h3 className="text-sm font-semibold">Selection</h3>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Control how users choose Wilayas.
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="selection-mode">Selection mode</Label>
+
+                    <select
+                      id="selection-mode"
+                      value={config.selectionMode}
+                      onChange={(event) => {
+                        const nextMode = event.target
+                          .value as WilayaMapSelectionMode
+
+                        updateConfig("selectionMode", nextMode)
+
+                        if (nextMode === "none") {
+                          setSelectedWilayas([])
+                        }
+                      }}
+                      className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                    >
+                      <option value="single">Single</option>
+                      <option value="multiple">Multiple</option>
+                      <option value="none">None / read-only</option>
+                    </select>
+                  </div>
+
+                  <ToggleField
+                    id="clearable"
+                    label="Allow deselection"
+                    description="Users can remove selected Wilayas."
+                    checked={config.clearable}
+                    disabled={isReadOnly}
+                    onCheckedChange={(value) =>
+                      updateConfig("clearable", value)
+                    }
+                  />
+
+                  <ToggleField
+                    id="modifier-key-multi-select"
+                    label="Modifier multi-select"
+                    description={
+                      modifierKeyAvailable
+                        ? "Alt, Ctrl, or Command adds to selection."
+                        : "Only available in single selection mode."
+                    }
+                    checked={config.modifierKeyMultiSelect}
+                    disabled={!modifierKeyAvailable}
+                    onCheckedChange={(value) =>
+                      updateConfig("modifierKeyMultiSelect", value)
+                    }
+                  />
+
+                  <div
+                    className={[
+                      "grid grid-cols-2 gap-3",
+                      !limitsAvailable ? "opacity-50" : "",
+                    ].join(" ")}
+                  >
+                    <div className="space-y-2">
+                      <Label htmlFor="min-selection">Minimum</Label>
+
+                      <input
+                        id="min-selection"
+                        type="number"
+                        min={0}
+                        max={69}
+                        disabled={!limitsAvailable}
+                        value={config.minSelection}
+                        onChange={(event) => {
+                          const nextMinimum = Math.max(
+                            0,
+                            Number(event.target.value) || 0
+                          )
+
+                          updateConfig("minSelection", nextMinimum)
+
+                          if (
+                            config.maxSelection > 0 &&
+                            config.maxSelection < nextMinimum
+                          ) {
+                            updateConfig("maxSelection", nextMinimum)
+                          }
+                        }}
+                        className="h-9 w-full rounded-md border bg-background px-3 text-sm disabled:cursor-not-allowed"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="max-selection">Maximum</Label>
+
+                      <input
+                        id="max-selection"
+                        type="number"
+                        min={0}
+                        max={69}
+                        disabled={!limitsAvailable}
+                        value={config.maxSelection}
+                        onChange={(event) => {
+                          const value = Math.max(
+                            0,
+                            Number(event.target.value) || 0
+                          )
+
+                          updateConfig(
+                            "maxSelection",
+                            value > 0
+                              ? Math.max(normalizedMinSelection, value)
+                              : 0
+                          )
+                        }}
+                        className="h-9 w-full rounded-md border bg-background px-3 text-sm disabled:cursor-not-allowed"
+                      />
+
+                      <p className="text-xs text-muted-foreground">
+                        Use 0 for no limit.
+                      </p>
+                    </div>
+                  </div>
+                </section>
+
+                <section
+                  id="color-controls"
+                  className="scroll-mt-4 space-y-3"
+                >
+                  <div>
+                    <h3 className="text-sm font-semibold">Colors</h3>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Change default, selected, and border colors.
+                    </p>
+                  </div>
+
+                  <ColorField
+                    id="default-color"
+                    label="Default fill"
+                    value={config.defaultColor}
+                    onChange={(value) =>
+                      updateConfig("defaultColor", value)
+                    }
+                  />
+
+                  <ColorField
+                    id="selected-color"
+                    label="Selected fill"
+                    value={config.selectedColor}
+                    onChange={(value) =>
+                      updateConfig("selectedColor", value)
+                    }
+                  />
+
+                  <ColorField
+                    id="stroke-color"
+                    label="Border"
+                    value={config.strokeColor}
+                    onChange={(value) =>
+                      updateConfig("strokeColor", value)
+                    }
+                  />
+                </section>
+
+                <section
+                  id="section-controls"
+                  className="scroll-mt-4"
+                >
+                  <div className="mb-2">
+                    <h3 className="text-sm font-semibold">Sections</h3>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Show or hide composable map sections.
+                    </p>
+                  </div>
+
+                  <ToggleField
+                    id="show-header"
+                    label="Header"
+                    checked={config.showHeader}
+                    onCheckedChange={(value) =>
+                      updateConfig("showHeader", value)
+                    }
+                  />
+
+                  <ToggleField
+                    id="show-toolbar"
+                    label="Toolbar"
+                    checked={config.showToolbar}
+                    onCheckedChange={(value) =>
+                      updateConfig("showToolbar", value)
+                    }
+                  />
+
+                  <ToggleField
+                    id="show-legend"
+                    label="Legend"
+                    checked={config.showLegend}
+                    onCheckedChange={(value) =>
+                      updateConfig("showLegend", value)
+                    }
+                  />
+
+                  <ToggleField
+                    id="show-selection"
+                    label="Selection chips"
+                    checked={config.showSelection}
+                    onCheckedChange={(value) =>
+                      updateConfig("showSelection", value)
+                    }
+                  />
+
+                  <ToggleField
+                    id="show-footer"
+                    label="Footer"
+                    checked={config.showFooter}
+                    onCheckedChange={(value) =>
+                      updateConfig("showFooter", value)
+                    }
+                  />
+
+                  <ToggleField
+                    id="show-guide"
+                    label="Guide dialog"
+                    checked={config.showGuide}
+                    onCheckedChange={(value) =>
+                      updateConfig("showGuide", value)
+                    }
+                  />
+                </section>
+              </div>
+            </div>
           </div>
         </aside>
 
-        <section className="flex min-w-0 flex-col gap-4">
-          <div className="flex flex-col gap-3 rounded-lg border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 className="font-semibold">
-                {activeTestCase?.label}
-              </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {activeTestCase?.description}
-              </p>
-            </div>
+        <div className="flex min-w-0 flex-col gap-6">
+          <section className="overflow-hidden rounded-xl border bg-card">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3">
+              <div>
+                <h2 className="font-semibold">Live preview</h2>
+                <p className="text-sm text-muted-foreground">
+                  Changes apply immediately.
+                </p>
+              </div>
 
-            {activeCase !== "uncontrolled" ? (
               <div className="flex flex-wrap gap-2">
                 <Button
                   type="button"
@@ -482,16 +642,7 @@ export default function Home() {
                   size="sm"
                   onClick={() => setSelectedWilayas(["16", "31"])}
                 >
-                  Select Algiers + Oran
-                </Button>
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSelectedWilayas(["16", "31", "25"])}
-                >
-                  Select 3 Wilayas
+                  Select 16 + 31
                 </Button>
 
                 <Button
@@ -501,48 +652,177 @@ export default function Home() {
                   onClick={() => setSelectedWilayas([])}
                   disabled={selectedWilayas.length === 0}
                 >
-                  Clear externally
+                  Clear
                 </Button>
               </div>
-            ) : null}
-          </div>
-
-          {activeCase === "required" && selectedWilayas.length === 0 ? (
-            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-800 dark:text-amber-300">
-              This scenario needs an initial selection. Click “Select Algiers +
-              Oran” above before testing required selection behavior.
             </div>
-          ) : null}
 
-          {renderActiveMap()}
-
-          {activeCase !== "uncontrolled" ? (
-            <>
-              <SelectionStatePanel
-                title="Controlled state from the parent page"
+            <div className="p-4">
+              <WilayaMap
                 selectedWilayas={selectedWilayas}
-                lastClickedWilaya={lastClickedWilaya}
-              />
+                setSelectedWilayas={setSelectedWilayas}
+                height={420}
+                selectionMode={config.selectionMode}
+                clearable={config.clearable}
+                minSelection={normalizedMinSelection}
+                maxSelection={maxSelection}
+                modifierKeyMultiSelect={config.modifierKeyMultiSelect}
+                defaultColor={config.defaultColor}
+                selectedColor={config.selectedColor}
+                strokeColor={config.strokeColor}
+                wilayaColors={WILAYA_COLORS}
+                onWilayaClick={setLastClickedWilaya}
+              >
+                {config.showHeader ? (
+                  <WilayaMapHeader
+                    title="Choose service areas"
+                    description="Select one or more wilayas where your team operates."
+                  />
+                ) : null}
 
-              <section className="rounded-lg border bg-card p-4">
-                <h3 className="font-medium">Recent selection events</h3>
+                <WilayaMapViewport>
+                  <WilayaMapCanvas />
 
-                {selectionEvents.length === 0 ? (
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Click a Wilaya to record selection updates.
-                  </p>
+                  {config.showToolbar ? <WilayaMapToolbar /> : null}
+
+                  {config.showLegend ? (
+                    <WilayaMapLegend
+                      items={[
+                        {
+                          label: "Available",
+                          color: config.defaultColor,
+                        },
+                        {
+                          label: "Algiers priority",
+                          color: "#60a5fa",
+                        },
+                        {
+                          label: "Oran priority",
+                          color: "#f97316",
+                        },
+                        {
+                          label: "Selected",
+                          color: config.selectedColor,
+                        },
+                      ]}
+                    />
+                  ) : null}
+
+                  {config.showSelection ? (
+                    <WilayaMapSelection emptyMessage="No service area selected" />
+                  ) : null}
+                </WilayaMapViewport>
+
+                {config.showFooter ? (
+                  <WilayaMapFooter>
+                    Hold <kbd>Alt</kbd>, <kbd>Ctrl</kbd>, or <kbd>⌘</kbd>{" "}
+                    while clicking to multi-select in single mode.
+                  </WilayaMapFooter>
+                ) : null}
+
+                {config.showGuide ? <WilayaMapGuideDialog /> : null}
+              </WilayaMap>
+            </div>
+          </section>
+
+          <section className="grid gap-4 md:grid-cols-2">
+            <div className="rounded-xl border bg-card p-4">
+              <h2 className="font-semibold">Current state</h2>
+
+              <dl className="mt-3 space-y-3 text-sm">
+                <div>
+                  <dt className="text-muted-foreground">Selected IDs</dt>
+                  <dd className="mt-1 font-mono">
+                    {selectedWilayas.length > 0
+                      ? selectedWilayas.join(", ")
+                      : "None"}
+                  </dd>
+                </div>
+
+                <div>
+                  <dt className="text-muted-foreground">Selected Wilayas</dt>
+                  <dd className="mt-1">
+                    {selectedNames.length > 0
+                      ? selectedNames.join(", ")
+                      : "None"}
+                  </dd>
+                </div>
+
+                <div>
+                  <dt className="text-muted-foreground">
+                    Last clicked Wilaya
+                  </dt>
+                  <dd className="mt-1">
+                    {lastClickedWilaya
+                      ? `${lastClickedWilaya.name} (${lastClickedWilaya.id})`
+                      : "None"}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+
+            <div className="rounded-xl border bg-card p-4">
+              <h2 className="font-semibold">Active props</h2>
+
+              <dl className="mt-3 space-y-3 text-sm">
+                <div>
+                  <dt className="text-muted-foreground">Selection mode</dt>
+                  <dd className="mt-1 font-mono">
+                    {config.selectionMode}
+                  </dd>
+                </div>
+
+                <div>
+                  <dt className="text-muted-foreground">Selection limits</dt>
+                  <dd className="mt-1 font-mono">
+                    {normalizedMinSelection} – {maxSelection ?? "unlimited"}
+                  </dd>
+                </div>
+
+                <div>
+                  <dt className="text-muted-foreground">Clearable</dt>
+                  <dd className="mt-1">
+                    {config.clearable ? "true" : "false"}
+                  </dd>
+                </div>
+
+                <div>
+                  <dt className="text-muted-foreground">
+                    Modifier-key multi-select
+                  </dt>
+                  <dd className="mt-1">
+                    {config.modifierKeyMultiSelect ? "true" : "false"}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          </section>
+
+          <section className="overflow-hidden rounded-xl border bg-card">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3">
+              <div>
+                <h2 className="font-semibold">Generated code</h2>
+                <p className="text-sm text-muted-foreground">
+                  Copy the JSX for the active configuration.
+                </p>
+              </div>
+
+              <Button type="button" size="sm" onClick={copyCode}>
+                {hasCopied ? (
+                  <Check className="mr-2 size-4" />
                 ) : (
-                  <ol className="mt-3 space-y-1 font-mono text-xs text-muted-foreground">
-                    {selectionEvents.map((event, index) => (
-                      <li key={`${event}-${index}`}>{event}</li>
-                    ))}
-                  </ol>
+                  <Clipboard className="mr-2 size-4" />
                 )}
-              </section>
-            </>
-          ) : null}
-        </section>
-      </main>
-    </div>
+                {hasCopied ? "Copied" : "Copy code"}
+              </Button>
+            </div>
+
+            <pre className="max-h-[560px] overflow-auto bg-muted/40 p-4 text-xs leading-6">
+              <code>{generatedCode}</code>
+            </pre>
+          </section>
+        </div>
+      </div>
+    </main>
   )
 }
