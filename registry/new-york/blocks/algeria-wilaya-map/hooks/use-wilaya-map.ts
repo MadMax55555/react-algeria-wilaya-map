@@ -37,6 +37,9 @@ type UseWilayaMapParams = {
 
   onWilayaClick?: (wilaya: AlgeriaWilaya) => void
   onSelectionChange?: (selectedIds: string[]) => void
+
+  renderTooltip?: (wilaya: AlgeriaWilaya) => React.ReactNode
+  tooltipDelay?: number
 }
 
 export function useWilayaMap({
@@ -53,6 +56,8 @@ export function useWilayaMap({
   setSelectedWilayas,
   onWilayaClick,
   onSelectionChange,
+  renderTooltip,
+  tooltipDelay,
 }: UseWilayaMapParams) {
   const [internalSelected, setInternalSelected] = React.useState<string[]>([])
   const [isPointerInside, setIsPointerInside] = React.useState(false)
@@ -313,5 +318,8 @@ export function useWilayaMap({
     zoomIn,
     zoomOut,
     resetTransform,
+
+    renderTooltip,
+    tooltipDelay,
   }
 }

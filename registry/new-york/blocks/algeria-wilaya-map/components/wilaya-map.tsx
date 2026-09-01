@@ -30,6 +30,9 @@ type WilayaMapProps = {
 
   onWilayaClick?: (wilaya: AlgeriaWilaya) => void
   onSelectionChange?: (selectedIds: string[]) => void
+
+  renderTooltip?: (wilaya: AlgeriaWilaya) => React.ReactNode
+  tooltipDelay?: number
 }
 
 export function WilayaMap({
@@ -51,6 +54,9 @@ export function WilayaMap({
   setSelectedWilayas,
   onWilayaClick,
   onSelectionChange,
+
+  renderTooltip,
+  tooltipDelay,
 }: WilayaMapProps) {
   const normalizedMinSelection = Math.max(0, minSelection)
 
@@ -75,6 +81,9 @@ export function WilayaMap({
     setSelectedWilayas,
     onWilayaClick,
     onSelectionChange,
+
+    renderTooltip,
+    tooltipDelay,
   })
 
   const value = React.useMemo(

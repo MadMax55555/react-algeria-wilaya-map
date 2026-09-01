@@ -1,6 +1,7 @@
 "use client"
 
 import { useWilayaMapContext } from "../context/wilaya-map-context"
+import { WilayaTooltip } from "./wilaya-map-tooltip"
 
 export function WilayaMapCanvas() {
   const {
@@ -13,6 +14,8 @@ export function WilayaMapCanvas() {
     selectedColor,
     getWilayaFill,
     toggleWilaya,
+    renderTooltip,
+    tooltipDelay,
   } = useWilayaMapContext()
 
   const isSelectionEnabled = selectionMode !== "none"
@@ -31,8 +34,9 @@ export function WilayaMapCanvas() {
         {data.map((wilaya) => {
           const id = String(wilaya.id)
           const isSelected = selected.includes(id)
+          const isInteractive = selectionMode !== "none"
 
-          return (
+          const pathElement = (
             <path
               key={id}
               d={wilaya.d}
@@ -45,7 +49,7 @@ export function WilayaMapCanvas() {
               }
               className={[
                 "outline-none transition-opacity duration-200",
-                isSelectionEnabled
+                isInteractive
                   ? "cursor-pointer hover:opacity-80 focus:opacity-80"
                   : "",
               ].join(" ")}
@@ -59,15 +63,26 @@ export function WilayaMapCanvas() {
                   toggleWilaya(wilaya, event)
                 }
               }}
-              tabIndex={isSelectionEnabled ? 0 : -1}
-              role={isSelectionEnabled ? "button" : undefined}
+              tabIndex={isInteractive ? 0 : -1}
+              role={isInteractive ? "button" : undefined}
               aria-label={wilaya.name}
-              aria-pressed={
-                isSelectionEnabled ? isSelected : undefined
-              }
+              aria-pressed={isInteractive ? isSelected : undefined}
             >
               <title>{wilaya.name}</title>
             </path>
+          )
+
+          return isInteractive ? (
+            <WilayaTooltip
+              key={`tooltip-${id}`}
+              wilaya={wilaya}
+              renderTooltip={renderTooltip}
+              delayDuration={tooltipDelay}
+            >
+              {pathElement}
+            </WilayaTooltip>
+          ) : (
+            pathElement
           )
         })}
       </g>
