@@ -45,6 +45,11 @@ type PlaygroundConfig = {
   showSelection: boolean
   showFooter: boolean
   showGuide: boolean
+
+  showTooltip: boolean
+  tooltipDelay: number
+  tooltipSide: "top" | "right" | "bottom" | "left"
+  tooltipSideOffset: number
 }
 
 const INITIAL_CONFIG: PlaygroundConfig = {
@@ -62,6 +67,11 @@ const INITIAL_CONFIG: PlaygroundConfig = {
   showSelection: true,
   showFooter: true,
   showGuide: true,
+
+  showTooltip: true,
+  tooltipDelay: 200,
+  tooltipSide: "top",
+  tooltipSideOffset: 4,
 }
 
 type ToggleFieldProps = {
@@ -168,6 +178,16 @@ function generateMapCode(config: PlaygroundConfig) {
     `defaultColor="${config.defaultColor}"`,
     `selectedColor="${config.selectedColor}"`,
     `strokeColor="${config.strokeColor}"`,
+    config.showTooltip
+      ? `renderTooltip={(wilaya) => (
+      <div>
+        <div className="font-medium">{wilaya.name}</div>
+        <div className="text-xs text-muted-foreground">
+          Code: {wilaya.id}
+        </div>
+      </div>
+    )}`
+      : null,
   ]
     .filter(Boolean)
     .map((prop) => `      ${prop}`)
@@ -379,6 +399,13 @@ export default function Home() {
                 className="rounded-md bg-muted px-2 py-1 whitespace-nowrap transition-colors hover:bg-muted/70"
               >
                 Sections
+              </a>
+
+              <a
+                href="#tooltip-controls"
+                className="rounded-md bg-muted px-2 py-1 whitespace-nowrap transition-colors hover:bg-muted/70"
+              >
+                Tooltip
               </a>
             </nav>
 
@@ -620,6 +647,95 @@ export default function Home() {
                     }
                   />
                 </section>
+
+                <section
+                  id="tooltip-controls"
+                  className="scroll-mt-4"
+                >
+                  <div className="mb-2">
+                    <h3 className="text-sm font-semibold">Tooltip</h3>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Configure hover tooltip behavior.
+                    </p>
+                  </div>
+
+                  <ToggleField
+                    id="show-tooltip"
+                    label="Enable tooltip"
+                    description="Show tooltip on hover and focus."
+                    checked={config.showTooltip}
+                    onCheckedChange={(value) =>
+                      updateConfig("showTooltip", value)
+                    }
+                  />
+
+                  <div className="space-y-2">
+                    <Label htmlFor="tooltip-delay">Delay (ms)</Label>
+                    <input
+                      id="tooltip-delay"
+                      type="number"
+                      min={0}
+                      max={2000}
+                      step={100}
+                      value={config.tooltipDelay}
+                      onChange={(event) =>
+                        updateConfig(
+                          "tooltipDelay",
+                          Math.max(0, Number(event.target.value) || 0)
+                        )
+                      }
+                      className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Time before tooltip appears.
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="tooltip-side">Position</Label>
+                    <select
+                      id="tooltip-side"
+                      value={config.tooltipSide}
+                      onChange={(event) =>
+                        updateConfig(
+                          "tooltipSide",
+                          event.target.value as
+                            | "top"
+                            | "right"
+                            | "bottom"
+                            | "left"
+                        )
+                      }
+                      className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                    >
+                      <option value="top">Top</option>
+                      <option value="right">Right</option>
+                      <option value="bottom">Bottom</option>
+                      <option value="left">Left</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="tooltip-offset">Offset (px)</Label>
+                    <input
+                      id="tooltip-offset"
+                      type="number"
+                      min={0}
+                      max={32}
+                      value={config.tooltipSideOffset}
+                      onChange={(event) =>
+                        updateConfig(
+                          "tooltipSideOffset",
+                          Math.max(0, Number(event.target.value) || 0)
+                        )
+                      }
+                      className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Distance from the Wilaya.
+                    </p>
+                  </div>
+                </section>
               </div>
             </div>
           </div>
@@ -672,6 +788,19 @@ export default function Home() {
                 strokeColor={config.strokeColor}
                 wilayaColors={WILAYA_COLORS}
                 onWilayaClick={setLastClickedWilaya}
+                renderTooltip={
+                  config.showTooltip
+                    ? (wilaya) => (
+                        <div>
+                          <div className="font-medium">{wilaya.name}</div>
+                          <div className="text-xs text-muted-foreground">
+                            Code: {wilaya.id}
+                          </div>
+                        </div>
+                      )
+                    : undefined
+                }
+                tooltipDelay={config.tooltipDelay}
               >
                 {config.showHeader ? (
                   <WilayaMapHeader
@@ -792,6 +921,34 @@ export default function Home() {
                   </dt>
                   <dd className="mt-1">
                     {config.modifierKeyMultiSelect ? "true" : "false"}
+                  </dd>
+                </div>
+
+                <div>
+                  <dt className="text-muted-foreground">Tooltip enabled</dt>
+                  <dd className="mt-1">
+                    {config.showTooltip ? "true" : "false"}
+                  </dd>
+                </div>
+
+                <div>
+                  <dt className="text-muted-foreground">Tooltip delay</dt>
+                  <dd className="mt-1 font-mono">
+                    {config.tooltipDelay} ms
+                  </dd>
+                </div>
+
+                <div>
+                  <dt className="text-muted-foreground">Tooltip position</dt>
+                  <dd className="mt-1 font-mono capitalize">
+                    {config.tooltipSide}
+                  </dd>
+                </div>
+
+                <div>
+                  <dt className="text-muted-foreground">Tooltip offset</dt>
+                  <dd className="mt-1 font-mono">
+                    {config.tooltipSideOffset} px
                   </dd>
                 </div>
               </dl>
