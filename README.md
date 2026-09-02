@@ -1,4 +1,4 @@
-# ACME shadcn Registry
+# Shadcn Registry
 
 A developer-focused **shadcn registry** of reusable UI components and blocks. The registry currently includes **Algeria Wilaya Map** and is designed to grow with additional components over time.
 
